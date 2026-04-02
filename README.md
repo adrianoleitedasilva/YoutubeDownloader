@@ -1,61 +1,116 @@
-# Youtube Downloader
+# YouTube Downloader
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.8%2B-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)
+![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)
 
-Este é um script em Python que permite baixar vídeos do YouTube na maior resolução disponível e escolher a faixa de áudio desejada — por exemplo, Português (Brasil), quando disponível.
-O projeto utiliza pytubefix para acessar os streams e ffmpeg para mesclar vídeo e áudio de forma rápida, sem perda de qualidade.
+Script Python para baixar vídeos do YouTube na maior resolução disponível, priorizando a faixa de áudio em Português (Brasil) quando presente, e mesclando as streams com `ffmpeg` sem perda de qualidade.
 
-✨ Recursos
-📹 Resolução máxima disponível (inclui 4K, 8K, se presentes).
+---
 
-🎙 Escolha do idioma do áudio (lista todas as faixas de áudio adaptativas).
+## Recursos
 
-⚡ Mesclagem de vídeo e áudio sem re-encode sempre que possível.
+- **Resolução máxima** — inclui 4K e 8K quando disponíveis
+- **Áudio PT-BR automático** — detecta e seleciona a faixa em português do Brasil; solicita confirmação para continuar com o áudio padrão caso não encontre
+- **Mesclagem sem re-encode** — usa `ffmpeg -c copy` para não perder qualidade; faz re-encode para MP4 automaticamente apenas se necessário
+- **Argumento de saída configurável** — defina a pasta de destino via CLI
+- **Modo verbose** — exibe logs de debug para diagnóstico
 
-🔄 Fallback automático para MP4 re-encodado quando necessário.
+---
 
-🛠 Suporte a linha de comando com filtros por idioma ou índice da faixa.
+## Requisitos
 
-🚀 Como funciona
-Busca o vídeo na resolução máxima.
+- Python 3.8+
+- [ffmpeg](https://ffmpeg.org/) no PATH
 
-Lista todas as faixas de áudio disponíveis.
+---
 
-Permite escolha manual por índice ou filtro por idioma.
+## Instalação
 
-Baixa vídeo e áudio separadamente.
+```bash
+# 1. Clone o repositório
+git clone https://github.com/adrianoleitedasilva/youtubeDownloader.git
+cd youtubeDownloader
 
-Mescla com ffmpeg no formato final.
+# 2. (Opcional) Crie e ative um ambiente virtual
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-📌 Description (EN)
-This is a Python script that allows you to download YouTube videos in the highest available resolution and select the audio track you want — for example, Portuguese (Brazil), when available.
-It uses pytubefix to access streams and ffmpeg to merge video and audio quickly without quality loss.
+# 3. Instale as dependências
+pip install -r requirements.txt
+```
 
-✨ Features
-📹 Maximum resolution available (includes 4K, 8K if present).
+### Instalar o ffmpeg
 
-🎙 Choose audio language (lists all available adaptive audio tracks).
+```bash
+# Windows (winget)
+winget install Gyan.FFmpeg
 
-⚡ Merge video and audio without re-encoding whenever possible.
+# Windows (chocolatey)
+choco install ffmpeg
 
-🔄 Automatic fallback to re-encoded MP4 when needed.
+# macOS (Homebrew)
+brew install ffmpeg
 
-🛠 Command-line support with filters by language or track index.
+# Linux (apt)
+sudo apt install ffmpeg
+```
 
-🚀 How it works
-Fetches the video in the maximum resolution.
-
-Lists all available audio tracks.
-
-Allows manual selection by index or language filter.
-
-Downloads video and audio separately.
-
-Merges them with ffmpeg into the final file.
-
-pip install pytubefix
-
-# Windows:
-
-winget install Gyan.FFmpeg # ou: choco install ffmpeg
+Verifique a instalação:
+```bash
 ffmpeg -version
+```
+
+---
+
+## Uso
+
+```bash
+# Interativo — solicita a URL no terminal
+python main.py
+
+# Passando a URL diretamente
+python main.py "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# Definindo a pasta de destino
+python main.py "https://youtu.be/VIDEO_ID" -o ./videos
+
+# Modo verbose (logs de debug)
+python main.py "https://youtu.be/VIDEO_ID" -v
+```
+
+### Opções
+
+| Argumento | Descrição | Padrão |
+|-----------|-----------|--------|
+| `url` | URL do vídeo do YouTube | *(solicitado interativamente)* |
+| `-o`, `--output` | Pasta de destino dos arquivos | `downloads/` |
+| `-v`, `--verbose` | Exibe logs de debug | desativado |
+
+---
+
+## Como funciona
+
+1. Valida a URL informada
+2. Busca o melhor stream de vídeo adaptive (maior resolução)
+3. Detecta faixas de áudio em PT-BR no `playerResponse`; se não encontrar, pergunta se deve usar o áudio padrão
+4. Baixa vídeo e áudio separadamente
+5. Mescla com `ffmpeg -c copy` (sem re-encode) em `.mkv`; se falhar, re-encoda para `.mp4`
+6. Remove os arquivos temporários
+
+---
+
+## Estrutura do projeto
+
+```
+youtubeDownloader/
+├── main.py           # Script principal
+├── requirements.txt  # Dependências Python
+└── downloads/        # Pasta de saída (criada automaticamente, ignorada pelo git)
+```
+
+---
+
+## Licença
+
+Distribuído sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
